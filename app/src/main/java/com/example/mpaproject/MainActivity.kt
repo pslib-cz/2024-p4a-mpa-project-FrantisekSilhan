@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
@@ -18,6 +19,13 @@ class MainActivity : AppCompatActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
     private lateinit var adapter: TaskAdapter
     private lateinit var recyclerView: RecyclerView
+    private var currentFilter: Filter = Filter.ALL
+
+    enum class Filter {
+        ALL,
+        COMPLETED,
+        INCOMPLETE
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,29 +34,26 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        taskViewModel.allTasks.observe(this) { tasks ->
-            tasks?.let {
-                val progress = taskViewModel.getCompletionProgress()
-                updateProgressDisplay(progress)
-
-                adapter = TaskAdapter(
-                    it,
-                    onTaskClicked = { task ->
-                        val intent = Intent(this, DetailActivity::class.java)
-                        intent.putExtra("task", task)
-                        startActivity(intent)
-                    },
-                    onTaskCheckChanged = { task ->
-                        taskViewModel.updateTask(task.id, task.title, task.description, task.isCompleted)
-                    }
-                )
-                recyclerView.adapter = adapter
-            }
-        }
+        applyFilter(currentFilter)
 
         val addButton: FloatingActionButton = findViewById(R.id.addButton)
         addButton.setOnClickListener {
             showAddTaskDialog()
+        }
+
+        val completedButton: Button = findViewById(R.id.completedButton)
+        completedButton.setOnClickListener {
+            applyFilter(Filter.COMPLETED)
+        }
+
+        val incompleteButton: Button = findViewById(R.id.incompleteButton)
+        incompleteButton.setOnClickListener {
+            applyFilter(Filter.INCOMPLETE)
+        }
+
+        val allButton: Button = findViewById(R.id.allButton)
+        allButton.setOnClickListener {
+            applyFilter(Filter.ALL)
         }
     }
 
@@ -72,5 +77,33 @@ class MainActivity : AppCompatActivity() {
     private fun updateProgressDisplay(progress: Float) {
         val progressBar = findViewById<ProgressBar>(R.id.determinateBar)
         progressBar.progress = progress.toInt()
+    }
+
+    private fun updateRecyclerView(tasks: List<Task>) {
+        adapter = TaskAdapter(
+            tasks,
+            onTaskClicked = { task ->
+                val intent = Intent(this, DetailActivity::class.java)
+                intent.putExtra("task", task)
+                startActivity(intent)
+            },
+            onTaskCheckChanged = { task ->
+                taskViewModel.updateTask(task.id, task.title, task.description, task.isCompleted)
+                Log.d("MainActivity", "${currentFilter}")
+                applyFilter(currentFilter)
+            }
+        )
+        recyclerView.adapter = adapter
+    }
+
+    private fun applyFilter(filter: Filter) {
+        currentFilter = filter
+        taskViewModel.setFilter(filter)
+
+        taskViewModel.filteredTasks.observe(this) { tasks ->
+            val progress = taskViewModel.getCompletionProgress()
+            updateProgressDisplay(progress)
+            updateRecyclerView(tasks)
+        }
     }
 }
