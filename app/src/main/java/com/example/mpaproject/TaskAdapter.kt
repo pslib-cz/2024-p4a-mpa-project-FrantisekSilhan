@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
 class TaskAdapter(
@@ -42,4 +43,12 @@ class TaskAdapter(
     }
 
     override fun getItemCount() = tasks.size
+
+    fun updateTasks(newTasks: List<Task>) {
+        val diffCallback = TaskDiffCallback(tasks, newTasks)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        tasks = newTasks
+        diffResult.dispatchUpdatesTo(this)
+    }
 }

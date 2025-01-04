@@ -34,6 +34,20 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+        adapter = TaskAdapter(
+            emptyList(),
+            onTaskClicked = { task ->
+                val intent = Intent(this, DetailActivity::class.java)
+                intent.putExtra("task", task)
+                startActivity(intent)
+            },
+            onTaskCheckChanged = { task ->
+                taskViewModel.updateTask(task.id, task.title, task.description, task.isCompleted)
+                applyFilter(currentFilter)
+            }
+        )
+        recyclerView.adapter = adapter
+
         applyFilter(currentFilter)
 
         val addButton: FloatingActionButton = findViewById(R.id.addButton)
@@ -80,20 +94,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateRecyclerView(tasks: List<Task>) {
-        adapter = TaskAdapter(
-            tasks,
-            onTaskClicked = { task ->
-                val intent = Intent(this, DetailActivity::class.java)
-                intent.putExtra("task", task)
-                startActivity(intent)
-            },
-            onTaskCheckChanged = { task ->
-                taskViewModel.updateTask(task.id, task.title, task.description, task.isCompleted)
-                Log.d("MainActivity", "${currentFilter}")
-                applyFilter(currentFilter)
-            }
-        )
-        recyclerView.adapter = adapter
+        adapter.updateTasks(tasks)
     }
 
     private fun applyFilter(filter: Filter) {
