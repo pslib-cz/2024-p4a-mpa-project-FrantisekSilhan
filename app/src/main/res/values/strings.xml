@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">mpaproject</string>
+    <string name="task_name">Název úkolu</string>
+    <string name="task">Úkol</string>
+    <string name="task_description">Popis úkolu</string>
+    <string name="save_changes">Uložit změny</string>
+    <string name="delete_task">Odstranit úkol</string>
+    <string name="back">Zpět</string>
+    <string name="finished">Dokončené</string>
+    <string name="unfinished">Nedokončené</string>
+    <string name="all">Vše</string>
+    <string name="add_task">Přidat Úkol</string>
+</resources>
