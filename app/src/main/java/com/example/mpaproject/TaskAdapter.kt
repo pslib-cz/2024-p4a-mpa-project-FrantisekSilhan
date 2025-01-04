@@ -26,7 +26,9 @@ class TaskAdapter(
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = tasks[position]
+        Log.d("TaskAdapter", "Binding task: ${task.title}, isCompleted: ${task.isCompleted}")
         holder.title.text = task.title
+        holder.checkBox.setOnCheckedChangeListener(null)
         holder.checkBox.isChecked = task.isCompleted
 
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
